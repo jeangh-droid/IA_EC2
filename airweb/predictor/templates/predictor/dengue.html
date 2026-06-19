@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Predicción Dengue Perú</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+
+    <nav class="navbar navbar-dark bg-primary px-4 mb-0">
+        <div class="container-fluid justify-content-center gap-4">
+            <a href="/" class="nav-link text-white">Titanic</a>
+            <a href="/dengue/" class="nav-link text-white fw-bold active">Dengue Perú</a>
+        </div>
+    </nav>
+
+    <div class="container mt-5 mb-5">
+        <div class="card shadow p-4">
+
+            <h1 class="text-center mb-2">Predicción de Dengue</h1>
+            <p class="text-center text-muted mb-4">
+                Red Neuronal + Árbol de Decisiones — Datos CDC Perú 2000–2024
+            </p>
+
+            <form method="POST">
+                {% csrf_token %}
+
+                <div class="mb-3">
+                    <label class="form-label">Departamento</label>
+                    <select name="departamento" class="form-select" required>
+                        <option value="">Seleccione</option>
+                        {% for dep in departamentos %}
+                        <option value="{{ dep }}">{{ dep }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Año</label>
+                    <input type="number" name="ano" class="form-control" min="2000" max="2024"
+                        placeholder="Ejemplo: 2023" required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Semana epidemiológica (1–52)</label>
+                    <input type="number" name="semana" class="form-control" min="1" max="52" placeholder="Ejemplo: 15"
+                        required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Edad</label>
+                    <input type="number" name="edad" class="form-control" min="0" max="120" placeholder="Ejemplo: 30"
+                        required>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Tipo de edad</label>
+                    <select name="tipo_edad" class="form-select" required>
+                        <option value="">Seleccione</option>
+                        <option value="A">A — Años</option>
+                        <option value="M">M — Meses</option>
+                        <option value="D">D — Días</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Sexo</label>
+                    <select name="sexo" class="form-select" required>
+                        <option value="">Seleccione</option>
+                        <option value="M">M — Masculino</option>
+                        <option value="F">F — Femenino</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label">Código DIRESA</label>
+                    <input type="number" name="diresa" class="form-control" placeholder="Ejemplo: 16" required>
+                </div>
+
+                <div class="d-grid">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        Predecir severidad
+                    </button>
+                </div>
+            </form>
+
+            {% if error %}
+            <div class="alert alert-danger mt-4">
+                <strong>Error:</strong> {{ error }}
+            </div>
+            {% endif %}
+
+            {% if resultado_red %}
+            <div class="alert alert-info mt-4 text-center">
+                <h3>Resultado de la predicción</h3>
+
+                <div class="row mt-3">
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 border-primary">
+                            <div class="card-body">
+                                <h6 class="text-muted">Red Neuronal</h6>
+                                <h4 class="mt-2
+                                {% if 'GRAVE' in resultado_red %}text-danger
+                                {% elif 'ALARMA' in resultado_red %}text-warning
+                                {% else %}text-success{% endif %}">
+                                    {{ resultado_red }}
+                                </h4>
+                                <p class="text-muted mb-0">{{ probabilidad }}% de probabilidad</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <div class="card h-100 border-primary">
+                            <div class="card-body">
+                                <h6 class="text-muted">Árbol de Decisiones</h6>
+                                <h4 class="mt-2
+                                {% if 'GRAVE' in resultado_arbol %}text-danger
+                                {% elif 'ALARMA' in resultado_arbol %}text-warning
+                                {% else %}text-success{% endif %}">
+                                    {{ resultado_arbol }}
+                                </h4>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="alert alert-secondary mt-4">
+                <h5>Explicación de los campos</h5>
+                <ul>
+                    <li><strong>Departamento:</strong> Región de probable infección.</li>
+                    <li><strong>Año:</strong> Año del caso registrado (2000–2024).</li>
+                    <li><strong>Semana epidemiológica:</strong> Semana de inicio de síntomas.</li>
+                    <li><strong>Edad:</strong> Edad del paciente.</li>
+                    <li><strong>Tipo de edad:</strong> A=Años, M=Meses, D=Días.</li>
+                    <li><strong>Sexo:</strong> M=Masculino, F=Femenino.</li>
+                    <li><strong>DIRESA:</strong> Código numérico de la Dirección Regional de Salud.</li>
+                </ul>
+            </div>
+
+        </div>
+    </div>
+
+</body>
+
+</html>
